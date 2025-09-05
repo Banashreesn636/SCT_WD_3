@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 300px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: #e63946;
+    }
+
+    .mode-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .mode-buttons button {
+      background-color: #457b9d;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+
+    .cell {
+      background: #fff3cd;
+      border: 2px solid #f4a261;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .cell.win {
+      background: #b7efc5;
+    }
+
+    .status {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .restart-btn {
+      background: #2a9d8f;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Tic Tac Toe</h1>
+    <div class="mode-buttons">
+      <button onclick="setMode('2p')">2 Player Mode</button>
+      <button onclick="setMode('ai')">Play vs Computer</button>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="status" id="status">Player X's turn</div>
+    <button class="restart-btn" onclick="resetGame()">Restart Game</button>
+  </div>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const statusElement = document.getElementById('status');
+    let cells = Array(9).fill('');
+    let currentPlayer = 'X';
+    let mode = '2p';
+
+    function renderBoard() {
+      boardElement.innerHTML = '';
+      cells.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = val;
+        cell.addEventListener('click', () => makeMove(i));
+        boardElement.appendChild(cell);
+      });
+    }
+
+    function setMode(selectedMode) {
+      mode = selectedMode;
+      resetGame();
+    }
+
+    function makeMove(i) {
+      if (cells[i] !== '' || checkWinner()) return;
+      cells[i] = currentPlayer;
+      if (checkWinner()) {
+        highlightWinner(checkWinner());
+        statusElement.textContent = `Player ${currentPlayer} wins!`;
+        return;
+      }
+      if (cells.every(c => c !== '')) {
+        statusElement.textContent = 'It\'s a draw!';
+        return;
+      }
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      statusElement.textContent = `Player ${currentPlayer}'s turn`;
+      renderBoard();
+
+      if (mode === 'ai' && currentPlayer === 'O') {
+        computerMove();
+      }
+    }
+
+    function computerMove() {
+      let emptyIndices = cells.map((c, i) => c === '' ? i : null).filter(i => i !== null);
+      let randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      setTimeout(() => makeMove(randomIndex), 500);
+    }
+
+    function checkWinner() {
+      const combos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      for (let combo of combos) {
+        if (cells[combo[0]] && cells[combo[0]] === cells[combo[1]] && cells[combo[1]] === cells[combo[2]]) {
+          return combo;
+        }
+      }
+      return null;
+    }
+
+    function highlightWinner(combo) {
+      const cellDivs = document.querySelectorAll('.cell');
+      combo.forEach(index => cellDivs[index].classList.add('win'));
+    }
+
+    function resetGame() {
+      cells = Array(9).fill('');
+      currentPlayer = 'X';
+      statusElement.textContent = "Player X's turn";
+      renderBoard();
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
